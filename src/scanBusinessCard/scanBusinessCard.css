@@ -1,0 +1,101 @@
+select, input {
+    margin: 5px 0;
+    padding: 10px;
+    width: 240px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+label {
+    font-size: 24px;
+    font-family: "游ゴシック Medium", "Yu Gothic Medium", "游ゴシック体", "YuGothic", "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", "メイリオ", "Meiryo", "verdana", sans-serif;
+}
+
+.container {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.business-card {
+    width: 960px;
+    height: 540px;
+    position: relative;
+    background-color: lightgray;
+    border: 1px solid lightgray;
+    overflow: hidden;
+}
+
+.dimensions {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+}
+
+.shutterbutton {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px;
+    font-size: 30px;
+    background-color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+}
+
+.token-container {
+    width: 960px;
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+}
+
+.token-container label {
+    grid-column: 1;
+}
+
+.token-container select{
+    grid-column: 2;
+    justify-self: center;
+}
+
+.information-container {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.information-container label {
+    width: 240px;
+}
+
+.companyInfo-container {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.companyInfo-container label {
+    width: 240px;
+}
+
+.button-container {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+.change-button {
+    background-color: gray;
+    border: none;
+    padding: 20px 40px;
+    border-radius: 10px;
+}

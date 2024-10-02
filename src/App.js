@@ -1,11 +1,11 @@
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
-import './scanBusinessCard/scanBusinessCard'
+import ScanBusinessCard  from './scanBusinessCard/ScanBusinessCard';
 
 function App() {
   return (
     <>
-      <scanBusinessCard/>
+      <ScanBusinessCard/>
     </>
   );
 }
