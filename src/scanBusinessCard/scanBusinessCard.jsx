@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react'; // useState と useRef をインポート
+import React, { useState, useRef, useEffect } from 'react'; 
 import './scanBusinessCard.css'; 
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const ScanBusinessCard = () => {
-    const [image, setImage] = useState(null); // 画像を保持するためのstate
+    const [image, setImage] = useState(null); 
     const [text, setText] = useState({
         token: '',
         name: '',
@@ -10,84 +11,73 @@ const ScanBusinessCard = () => {
         email: '',
         registrationNumber: ''
     });
-    const [isImageCaptured, setIsImageCaptured] = useState(false); // 画像がキャプチャされたかどうかを管理
+    const [isImageCaptured, setIsImageCaptured] = useState(false); 
 
-    const videoRef = useRef(null); // videoRefを使用するためにuseRefを使用
-    const canvasRef = useRef(null); // canvasRefの名前を修正
+    const videoRef = useRef(null); 
+    const canvasRef = useRef(null); 
 
     useEffect(() => {
-        let stream;
-    
         const startCamera = async () => {
             try {
                 const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
                 if (videoRef.current) {
-                    // すでにストリームがある場合は停止
                     if (videoRef.current.srcObject) {
                         const tracks = videoRef.current.srcObject.getTracks();
                         tracks.forEach(track => track.stop());
                     }
-                    videoRef.current.srcObject = newStream; // 新しいストリームを設定
-                    await videoRef.current.play(); // play()を呼び出す
+                    videoRef.current.srcObject = newStream; 
+                    await videoRef.current.play(); 
                 }
             } catch (error) {
                 console.error("カメラへのアクセスエラー: ", error);
             }
         };
         
-        
-        
-    
         startCamera();
-    
+
         return () => {
-            // クリーンアップ: コンポーネントがアンマウントされたときにストリームを停止
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
+            if (videoRef.current && videoRef.current.srcObject) {
+                const tracks = videoRef.current.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
             }
         };
     }, []);
 
-    // シャッターボタンが押された時の処理
     const handleCapture = async () => {
         const canvas = canvasRef.current;
         const video = videoRef.current;
 
         if (!isImageCaptured) {
-            // 画像がまだキャプチャされていない場合
             if (canvas && video) {
                 const context = canvas.getContext('2d');
-                context.drawImage(video, 0, 0, canvas.width, canvas.height); // ビデオのフレームをキャンバスに描画
+                context.drawImage(video, 0, 0, canvas.width, canvas.height); 
         
-                // toBlob メソッドを使って画像をBlobに変換し、コールバックで処理
                 canvas.toBlob(async (blob) => {
                     if (blob) {
-                        setImage(URL.createObjectURL(blob)); // プレビュー用にBlobから画像URLを生成
-                        await recognizeText(blob); // BlobデータをOCRに送信
+                        setImage(URL.createObjectURL(blob)); 
+                        await recognizeText(blob); 
                     }
-                }, 'image/png'); // 画像フォーマットを指定
-                setIsImageCaptured(true); // 画像がキャプチャされたとマーク
+                }, 'image/png'); 
+                setIsImageCaptured(true); 
             }
         } else {
-            // 画像がすでにキャプチャされている場合
-            setIsImageCaptured(false); // 状態をリセット
-            setImage(null); // キャプチャした画像をクリア
+            setIsImageCaptured(false); 
+            setImage(null); 
         }
     };
 
-    // Google Cloud Vision API を呼び出してOCR処理を行う
     const recognizeText = async (blob) => {
-        const base64Image = await blobToBase64(blob); // BlobをBase64に変換
+        const base64Image = await blobToBase64(blob);
     
         const requestBody = {
             requests: [
                 {
                     image: {
-                        content: base64Image // Base64エンコードされた画像を設定
+                        content: base64Image,
                     },
                     features: [
                         {
-                            type: 'TEXT_DETECTION', // 必要に応じてタイプを変更
+                            type: 'TEXT_DETECTION',
                             maxResults: 10,
                         },
                     ],
@@ -98,54 +88,90 @@ const ScanBusinessCard = () => {
         try {
             const response = await fetch('https://vision.googleapis.com/v1/images:annotate?key=AIzaSyBIMyKU-0GPuNkVM23NjqhqUUuwgn-3OsE', {
                 method: 'POST',
-                body: JSON.stringify(requestBody), // JSON.stringifyでリクエストボディを文字列に変換
                 headers: {
-                    'Content-Type': 'application/json', // JSONのコンテンツタイプを設定
+                    'Content-Type': 'application/json',
                 },
+                body: JSON.stringify(requestBody),
             });
     
             if (!response.ok) {
-                throw new Error(`HTTPエラー! ステータス: ${response.status}`); // エラーハンドリング
+                throw new Error(`HTTPエラー! ステータス: ${response.status}`);
             }
     
-            const data = await response.json(); // APIレスポンスをJSONに変換
-            console.log(data); // レスポンスデータをコンソールに出力
+            const data = await response.json();
+            console.log(data);
+            const text = data.responses[0].fullTextAnnotation.text;
     
-            // Google Vision API の結果を処理する
-            if (data && data.responses) {
-                const textAnnotations = data.responses[0].textAnnotations;
-                if (textAnnotations && textAnnotations.length > 0) {
-                    setText(prevState => ({
-                        ...prevState,
-                        name: textAnnotations[0].description // 例: 名前をOCR結果から取得
-                    }));
-                }
-            }
+            // 抽出したテキストをGoogle Gemini APIで分析
+            await handleAnalyzeAndFill(text);
         } catch (error) {
-            console.error('Google Vision API のリクエストに失敗しました: ', error); // エラーログを表示
+            console.error('Vision APIエラー:', error);
         }
+    };
+
+    const handleAnalyzeAndFill = async (text) => {
+        const entities = await analyzeWithGemini(text);
+        fillFormWithEntities(entities); 
+    };
+
+    const genAI = new GoogleGenerativeAI('AIzaSyCR6hmKAfUoRmW3SIGarJuanTYNCXRUA9c');
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    const analyzeWithGemini = async (inputtext) => {
+
+        console.log(inputtext);
+
+        const prompt =  `以下のテキストからPERSON(名前)、MAIL(メールアドレス)、ORGANIZATION(会社名)を抽出しJavaScriptで"""""そのまま""""""jsonに変換できるレスポンスを出力してください。最初に形式を説明するような文字は入れないでください。:\n${inputtext}`;
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+
+        console.log(response);
+
+        const text = response.text();
+        console.log('text', text);
     };
     
     
+    
+    
 
-    // BlobをBase64に変換するヘルパー関数
+    const fillFormWithEntities = (entities) => {
+        let name = '';
+        let companyName = '';
+        let email = '';
+
+        // entitiesオブジェクトから必要なデータを抽出
+        if (entities) {
+            name = entities.find(entity => entity.type === 'PERSON')?.name || '';
+            companyName = entities.find(entity => entity.type === 'ORGANIZATION')?.name || '';
+            email = entities.find(entity => entity.type === 'MAIL')?.name || '';
+        }
+
+        setText(prevState => ({
+            ...prevState,
+            name,
+            companyName,
+            email,
+        }));
+    };
+
     const blobToBase64 = (blob) => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => {
-                resolve(reader.result.split(',')[1]); // Base64部分のみを返す
+                resolve(reader.result.split(',')[1]);
             };
             reader.onerror = reject;
-            reader.readAsDataURL(blob); // BlobをDataURLに変換
+            reader.readAsDataURL(blob);
         });
     };
 
     return (
         <div className='container'>
             <div className='business-card'>
-                <video ref={videoRef} width="960" height="540" style={{ display: isImageCaptured ? 'none' : 'block' }}></video> {/* カメラ映像を表示 */}
-                <canvas ref={canvasRef} width="960" height="540" style={{ display: 'none' }}></canvas> {/* canvasは隠して使用 */}
-                {image && <img src={image} alt='Captured Business Card' />} {/* キャプチャした画像を表示 */}
+                <video ref={videoRef} width="960" height="540" style={{ display: isImageCaptured ? 'none' : 'block' }}></video>
+                <canvas ref={canvasRef} width="960" height="540" style={{ display: 'none' }}></canvas>
+                {image && <img src={image} alt='Captured Business Card' />}
                 <button className='shutterbutton' onClick={handleCapture} style={{ marginTop: '20px', padding: '10px', fontSize: '16px' }}>
                 ●
                 </button>
@@ -160,13 +186,13 @@ const ScanBusinessCard = () => {
                     <label className='basic-info'>基本情報</label>
                     <input
                         type="text"
-                        value={text.name || ''} // 空文字列をデフォルト値として設定
+                        value={text.name || ''}
                         onChange={e => setText({ ...text, name: e.target.value })}
                         placeholder="氏名"
                     />
                     <input
                         type="email"
-                        value={text.email || ''} // 空文字列をデフォルト値として設定
+                        value={text.email || ''}
                         onChange={e => setText({ ...text, email: e.target.value })}
                         placeholder="e-mail"
                     />
@@ -176,13 +202,13 @@ const ScanBusinessCard = () => {
                     <label>会社情報</label>
                     <input
                         type="text"
-                        value={text.companyName || ''} // 空文字列をデフォルト値として設定
+                        value={text.companyName || ''}
                         onChange={e => setText({ ...text, companyName: e.target.value })}
                         placeholder="会社名"
                     />
                     <input
                         type="text"
-                        value={text.registrationNumber || ''} // 空文字列をデフォルト値として設定
+                        value={text.registrationNumber || ''}
                         onChange={e => setText({ ...text, registrationNumber: e.target.value })}
                         placeholder="法人番号"
                     />
@@ -190,10 +216,9 @@ const ScanBusinessCard = () => {
                 <div className='button-container'>
                     <button className='change-button' onClick={() => console.log(text)}>変更</button>
                 </div>
-                
             </div>
         </div>
     );
 };
 
-export default ScanBusinessCard; // コンポーネント名も修正
+export default ScanBusinessCard;
