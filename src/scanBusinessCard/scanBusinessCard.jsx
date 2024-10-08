@@ -118,42 +118,67 @@ const ScanBusinessCard = () => {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const analyzeWithGemini = async (inputtext) => {
-
         console.log(inputtext);
+    
+        const prompt = `以下のテキストから名前、メールアドレス、会社名をそれぞれ抽出してください。形式はPERSON（名前）、MAIL（メールアドレス）、ORGANIZATION（会社名）で、それぞれの値を対応するプロパティに出力してください。
 
-        const prompt =  `以下のテキストからPERSON(名前)、MAIL(メールアドレス)、ORGANIZATION(会社名)を抽出しJavaScriptで"""""そのまま""""""jsonに変換できるレスポンスを出力してください。最初に形式を説明するような文字は入れないでください。:\n${inputtext}`;
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-
-        console.log(response);
-
-        const text = response.text();
-        console.log('text', text);
+        - 名前は漢字を優先し、英語名がある場合はそれも考慮してください。
+        - メールアドレスは「@」を含む形式で指定してください。
+        - 会社名は最も妥当なもので、株式会社という文字列がある場合はそれを含むものを優先して選んでください。
+        
+        もしエンティティが見つからない場合は、各プロパティの値を空文字列にしてください。
+        
+        出力はすべてJSONオブジェクトの形式で、余計な説明やバッククォートを絶対に含めず、純粋なJSONオブジェクトのみを返してください。出力は次のような形式にしてください:
+        
+        {
+          "PERSON": "<名前>",
+          "MAIL": "<メールアドレス>",
+          "ORGANIZATION": "<会社名>"
+        }
+        
+        テキスト: ${inputtext}
+        `;
+    
+        try {
+            const result = await model.generateContent(prompt);
+            
+            // テキストとしてレスポンスを取得
+            const textResponse = await result.response.text();  // テキストデータを取得
+            console.log('Generated response:', textResponse);
+    
+            // JSONパースしてオブジェクトを取得
+            const entities = JSON.parse(textResponse);  // テキストをJSONに変換
+    
+            // フォームにエンティティを反映
+            fillFormWithEntities(entities);
+        } catch (error) {
+            console.error('レスポンス解析エラー:', error);
+        }
     };
     
     
     
-    
-
     const fillFormWithEntities = (entities) => {
-        let name = '';
-        let companyName = '';
-        let email = '';
-
-        // entitiesオブジェクトから必要なデータを抽出
-        if (entities) {
-            name = entities.find(entity => entity.type === 'PERSON')?.name || '';
-            companyName = entities.find(entity => entity.type === 'ORGANIZATION')?.name || '';
-            email = entities.find(entity => entity.type === 'MAIL')?.name || '';
+        // entitiesが存在しない場合は何もしないように修正
+        if (!entities) {
+            return;  // エラーメッセージを出力せず、処理を中断
         }
-
+    
+        // entitiesオブジェクトから直接データを抽出し、フォームの値を設定
+        const { PERSON = '', MAIL = '', ORGANIZATION = '' } = entities;
+    
         setText(prevState => ({
             ...prevState,
-            name,
-            companyName,
-            email,
+            name: PERSON,
+            email: MAIL,
+            companyName: ORGANIZATION
         }));
     };
+    
+    
+    
+    
+    
 
     const blobToBase64 = (blob) => {
         return new Promise((resolve, reject) => {
