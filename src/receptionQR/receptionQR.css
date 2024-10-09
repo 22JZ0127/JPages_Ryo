@@ -1,0 +1,30 @@
+/* 全体のコンテナを縦横中央に配置 */
+.qr-code-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: white;
+  }
+  
+  /* 上部のメッセージ (QRコードを読み込む指示) */
+  .qr-instruction {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    color: black;
+  }
+  
+  /* QRコード自体のスタイル */
+  .qr-code {
+    margin-bottom: 30px;
+  }
+  
+  /* 下部の来場者番号メッセージ */
+  .visitor-message {
+    font-size: 1.5rem;
+    color: black;
+  }
+  
