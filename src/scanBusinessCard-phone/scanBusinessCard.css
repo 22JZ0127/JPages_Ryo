@@ -1,0 +1,69 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.camera {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.capture-btn {
+    width: 70px; /* 幅を設定 */
+    height: 70px; /* 高さを設定 */
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    background-color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 90%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+input {
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+.confirm-btn {
+    padding: 15px;
+    font-size: 18px;
+    background-color: gray;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.loading-message {
+    font-size: 24px; /* フォントサイズを大きく */
+    font-weight: bold; /* 太字 */
+    color: #FF0000; /* 赤色 */
+    margin: 10px 0; /* 上下のマージン */
+    text-align: center; /* 中央揃え */
+}

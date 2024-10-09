@@ -1,6 +1,6 @@
 // import logo from './logo.svg';
 import './App.css';
-import ScanBusinessCard  from './scanBusinessCard/ScanBusinessCard';
+import ScanBusinessCard  from './scanBusinessCard-phone/ScanBusinessCard';
 
 function App() {
   return (
