@@ -9,8 +9,9 @@ const ScanBusinessCardMobile = () => {
         companyName: '',
         email: ''
     });
+    const [visitorType, setVisitorType] = useState(''); // 追加: 選択された訪問者タイプ
     const [isImageCaptured, setIsImageCaptured] = useState(false); 
-    const [loading, setLoading] = useState(false); // Loading state
+    const [loading, setLoading] = useState(false); 
 
     const videoRef = useRef(null); 
     const canvasRef = useRef(null); 
@@ -18,22 +19,31 @@ const ScanBusinessCardMobile = () => {
     useEffect(() => {
         const startCamera = async () => {
             try {
+                if (videoRef.current && videoRef.current.srcObject) {
+                    const tracks = videoRef.current.srcObject.getTracks();
+                    tracks.forEach(track => track.stop());
+                    videoRef.current.srcObject = null;
+                }
+    
                 const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                
                 if (videoRef.current) {
-                    if (videoRef.current.srcObject) {
-                        const tracks = videoRef.current.srcObject.getTracks();
-                        tracks.forEach(track => track.stop());
-                    }
-                    videoRef.current.srcObject = newStream; 
-                    await videoRef.current.play(); 
+                    videoRef.current.srcObject = newStream;
+                    videoRef.current.onloadedmetadata = async () => {
+                        try {
+                            await videoRef.current.play();
+                        } catch (playError) {
+                            console.error("ビデオ再生エラー: ", playError);
+                        }
+                    };
                 }
             } catch (error) {
                 console.error("カメラへのアクセスエラー: ", error);
             }
         };
-        
+    
         startCamera();
-
+    
         return () => {
             if (videoRef.current && videoRef.current.srcObject) {
                 const tracks = videoRef.current.srcObject.getTracks();
@@ -41,6 +51,7 @@ const ScanBusinessCardMobile = () => {
             }
         };
     }, []);
+    
 
     const handleCapture = async () => {
         const canvas = canvasRef.current;
@@ -54,9 +65,9 @@ const ScanBusinessCardMobile = () => {
                 canvas.toBlob(async (blob) => {
                     if (blob) {
                         setImage(URL.createObjectURL(blob)); 
-                        setLoading(true); // Start loading
+                        setLoading(true); 
                         await recognizeText(blob); 
-                        setLoading(false); // End loading
+                        setLoading(false);
                     }
                 }, 'image/png'); 
                 setIsImageCaptured(true); 
@@ -115,8 +126,10 @@ const ScanBusinessCardMobile = () => {
         - 名前は漢字を優先してください。
         - メールアドレスは「@」を含む形式で指定してください。
         - 会社名は最も妥当なもので、株式会社という文字列がある場合はそれを含むものを優先して選んでください。
+        - 会社名に当てはまるものがなく、学校名だと思われるものと学科名だと思われるものがある場合は、学校名ではな●●科のような学科名をORGANIZATIONに出力してください。
+        - 極力各要素を埋めるようにしてください。
         
-        もしエンティティが見つからない場合は、各プロパティの値を空文字列にしてください。
+        もしエンティティが見つからない場合は、各プロパティの値を空文字列にし、nullにはしないでください。
         
         最終応答は、"{"で始まり"}"で終わるJSONのみを出力し、JSON以外の文字は一切応答に含めないでください。出力は次のような形式にしてください:
         
@@ -127,19 +140,13 @@ const ScanBusinessCardMobile = () => {
         }
         
         テキスト: ${inputText}
-        `;
+`;
 
         try {
             const result = await model.generateContent(prompt);
-            
-            // テキストとしてレスポンスを取得
-            const textResponse = await result.response.text();  // テキストデータを取得
+            const textResponse = await result.response.text();
             console.log('Generated response:', textResponse);
-    
-            // JSONパースしてオブジェクトを取得
-            const entities = JSON.parse(textResponse);  // テキストをJSONに変換
-    
-            // フォームにエンティティを反映
+            const entities = JSON.parse(textResponse);
             fillFormWithEntities(entities);
         } catch (error) {
             console.error('レスポンス解析エラー:', error);
@@ -167,46 +174,72 @@ const ScanBusinessCardMobile = () => {
         });
     };
 
-    return (
-        <div className='container'>
-            {!isImageCaptured ? (
-                <div className='camera'>
-                    <video ref={videoRef} className='video' />
-                    <button className='capture-btn' onClick={handleCapture}>●</button>
-                </div>
-            ) : (
-                <div className='input-container'>
-                    <input 
-                        type="text" 
-                        value={text.name} 
-                        onChange={e => setText({ ...text, name: e.target.value })} 
-                        placeholder="氏名" 
-                    />
-                    {text.name === '' && <div className='warning'>手入力をお願いします</div>} {/* 手入力促すメッセージ */}
-                    
-                    <input 
-                        type="email" 
-                        value={text.email} 
-                        onChange={e => setText({ ...text, email: e.target.value })} 
-                        placeholder="e-mail" 
-                    />
-                    {text.email === '' && <div className='warning'>手入力をお願いします</div>} {/* 手入力促すメッセージ */}
-                    
-                    <input 
-                        type="text" 
-                        value={text.companyName} 
-                        onChange={e => setText({ ...text, companyName: e.target.value })} 
-                        placeholder="会社名" 
-                    />
-                    {text.companyName === '' && <div className='warning'>手入力をお願いします</div>} {/* 手入力促すメッセージ */}
-                    
-                    <button className='confirm-btn' onClick={() => console.log('次の画面へ遷移')}>確認</button>
-                </div>
-            )}
-            {loading && <div className='loading-message'>現在スキャン中です...</div>} {/* ローディングメッセージ */}
-            <canvas ref={canvasRef} className='canvas' width="960" height="540" style={{ display: 'none' }}></canvas>
-        </div>
-    );
+    // (中略)
+
+// (中略)
+
+return (
+    <div className='container'>
+        {!isImageCaptured ? (
+            <div className='camera'>
+                <video ref={videoRef} className='video' />
+                <p>名刺をスキャンしてください</p>
+                <button className='capture-btn' onClick={handleCapture}>●</button>
+            </div>
+        ) : (
+            <form action="POST" className='input-container'>
+                {/* セレクトボックスを最上部に配置 */}
+                <select 
+                    value={visitorType} 
+                    onChange={e => setVisitorType(e.target.value)}
+                    className="select-box"
+                >
+                    <option value="">来場者区分を選択してください</option>
+                    <option value="1">企業の方</option>
+                    <option value="2">教員</option>
+                    <option value="3">日本電子専門学校生</option>
+                    <option value="4">卒業生</option>
+                    <option value="5">その他</option>
+                </select>
+
+                <input 
+                    type="text" 
+                    value={text.name} 
+                    onChange={e => setText({ ...text, name: e.target.value })} 
+                    placeholder="氏名" 
+                />
+                {text.name === '' && <div className='warning'>手入力をお願いします</div>}
+                
+                <input 
+                    type="email" 
+                    value={text.email} 
+                    onChange={e => setText({ ...text, email: e.target.value })} 
+                    placeholder="e-mail" 
+                />
+                {text.email === '' && <div className='warning'>手入力をお願いします</div>}
+                
+                <input 
+                    type="text" 
+                    value={text.companyName} 
+                    onChange={e => setText({ ...text, companyName: e.target.value })} 
+                    placeholder="所属" 
+                />
+                {text.companyName === '' && <div className='warning'>手入力をお願いします</div>}
+                
+                {/* 手入力をお願いしますメッセージを所属の下に表示 */}
+                {(visitorType === '2' || visitorType === '3') && (
+                    <div>所属には学科名を入力してください。</div>
+                )}
+
+                <button className='confirm-btn' onClick={() => console.log('次の画面へ遷移')}>確認</button>
+            </form>
+        )}
+        {loading && <div className='loading-message'>現在スキャン中です...</div>}
+        <canvas ref={canvasRef} className='canvas' width="960" height="540" style={{ display: 'none' }}></canvas>
+    </div>
+);
+
+
 };
 
 export default ScanBusinessCardMobile;
