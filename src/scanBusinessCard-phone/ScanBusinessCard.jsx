@@ -174,9 +174,6 @@ const ScanBusinessCardMobile = () => {
         });
     };
 
-    // (中略)
-
-// (中略)
 
 return (
     <div className='container'>
@@ -228,7 +225,7 @@ return (
                 
                 {/* 手入力をお願いしますメッセージを所属の下に表示 */}
                 {(visitorType === '2' || visitorType === '3') && (
-                    <div>所属には学科名を入力してください。</div>
+                    <div>所属には学科名を入力してください。<br />例：高度情報処理科</div>
                 )}
 
                 <button className='confirm-btn' onClick={() => console.log('次の画面へ遷移')}>確認</button>
