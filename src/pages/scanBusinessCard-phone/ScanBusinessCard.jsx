@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'; 
 import './scanBusinessCard.css'; 
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import Ajax from '../lib/Ajax';
+import Ajax from '../../lib/Ajax';
 
 const ScanBusinessCardMobile = () => {
     const [image, setImage] = useState(null); 
