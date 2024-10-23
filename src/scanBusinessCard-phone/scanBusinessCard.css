@@ -111,3 +111,8 @@ input, select {
 .canvas {
     display: none;
 }
+
+.error-message {
+    color: red; /* 赤字 */
+    margin-top: 10px; /* 上の余白 */
+}

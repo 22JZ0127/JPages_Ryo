@@ -10,9 +10,11 @@ const ScanBusinessCardMobile = () => {
         companyName: '',
         email: ''
     });
-    const [visitorType, setVisitorType] = useState(''); 
+    const [visitorType, setVisitorType] = useState('0');
     const [isImageCaptured, setIsImageCaptured] = useState(false); 
     const [loading, setLoading] = useState(false); 
+    const [errorMessage, setErrorMessage] = useState('');
+
 
     const videoRef = useRef(null); 
     const canvasRef = useRef(null); 
@@ -130,7 +132,7 @@ const ScanBusinessCardMobile = () => {
         - 会社名に当てはまるものがなく、学校名だと思われるものと学科名だと思われるものがある場合は、学校名ではなく学科名をORGANIZATIONに出力してください。
         - 極力各要素を埋めるようにしてください。
         
-        もしエンティティが見つからない場合は、各プロパティの値を空文字列にし、nullにはしないでください。
+        もしエンティティが見つからない場合は、絶対にnullは返さず、空文字列""を返してください。
         
         最終応答は、"{"で始まり"}"で終わるJSONのみを出力し、JSON以外の文字は一切応答に含めないでください。出力は次のような形式にしてください:
         
@@ -156,15 +158,19 @@ const ScanBusinessCardMobile = () => {
 
     const fillFormWithEntities = (entities) => {
         if (!entities) return;
-
-        const { PERSON = '', MAIL = '', ORGANIZATION = '' } = entities;
-
+    
+        // 各フィールドの値をnullまたはundefinedの場合は空文字列に変換
+        const name = entities.PERSON || '';
+        const email = entities.MAIL || '';
+        const companyName = entities.ORGANIZATION || '';
+    
         setText({ 
-            name: PERSON, 
-            email: MAIL, 
-            companyName: ORGANIZATION 
+            name, 
+            email, 
+            companyName 
         });
     };
+    
 
     const blobToBase64 = (blob) => {
         return new Promise((resolve, reject) => {
@@ -177,6 +183,14 @@ const ScanBusinessCardMobile = () => {
 
     const handleSubmit = (ev) => {
         ev.preventDefault();
+    
+        // 来場者区分が選択されていない場合はエラーメッセージを設定
+        if (visitorType === '0') {
+            setErrorMessage('来場者区分を選択してください');
+            return; // これ以降の処理を中断
+        } else {
+            setErrorMessage(''); // エラーメッセージをリセット
+        }
         
         // 訪問者区分に基づいてdivisionを決定
         let division = 0; // デフォルト値
@@ -212,14 +226,15 @@ const ScanBusinessCardMobile = () => {
         .then((data) => {
             if (data.status === 'success') {
                 console.log('登録成功');
+                console.log(data);
             } else {
                 console.log(data.message);
             }
         }).catch((error) => {
             console.error('通信エラー:', error);
         });
-    }
-    
+    };
+
 
     return (
         <>
@@ -232,27 +247,35 @@ const ScanBusinessCardMobile = () => {
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className='input-container'>
-                        {/* セレクトボックスを最上部に配置 */}
                         <select 
                             value={visitorType} 
-                            onChange={e => setVisitorType(e.target.value)}
+                            onChange={e => {
+                                setVisitorType(e.target.value);
+                                // エラーメッセージをリセット
+                                if (e.target.value !== '0') {
+                                    setErrorMessage('');
+                                }
+                            }}
                             className="select-box"
                         >
-                            <option value="">来場者区分を選択してください</option>
+                            <option value="0">来場者区分を選択してください</option>
                             <option value="1">企業の方</option>
                             <option value="2">教員</option>
                             <option value="3">日本電子専門学校生</option>
                             <option value="4">卒業生</option>
                             <option value="5">その他</option>
                         </select>
-
+    
+                        {/* エラーメッセージの表示 */}
+                        {errorMessage && <div className='error-message' style={{ color: 'red' }}>{errorMessage}</div>}
+    
                         <input 
                             type="text" 
                             value={text.name} 
                             onChange={e => setText({ ...text, name: e.target.value })} 
                             placeholder="氏名" 
                         />
-                        {text.name === '' && <div className='warning'>手入力をお願いします</div>}
+                        {!loading && text.name === '' && <div className='warning'>手入力をお願いします</div>}
                         
                         <input 
                             type="email" 
@@ -260,7 +283,7 @@ const ScanBusinessCardMobile = () => {
                             onChange={e => setText({ ...text, email: e.target.value })} 
                             placeholder="e-mail" 
                         />
-                        {text.email === '' && <div className='warning'>手入力をお願いします</div>}
+                        {!loading && text.email === '' && <div className='warning'>手入力をお願いします</div>}
                         
                         <input 
                             type="text" 
@@ -268,13 +291,12 @@ const ScanBusinessCardMobile = () => {
                             onChange={e => setText({ ...text, companyName: e.target.value })} 
                             placeholder="所属" 
                         />
-                        {text.companyName === '' && <div className='warning'>手入力をお願いします</div>}
+                        {!loading && text.companyName === '' && <div className='warning'>手入力をお願いします</div>}
                         
-                        {/* 手入力をお願いしますメッセージを所属の下に表示 */}
                         {(visitorType === '2' || visitorType === '3') && (
                             <div>所属には学科名を入力してください。<br />例：高度情報処理科</div>
                         )}
-
+    
                         <button type="submit" className='confirm-btn'>確認</button>
                     </form>
                 )}
@@ -283,6 +305,7 @@ const ScanBusinessCardMobile = () => {
             </div>
         </>
     );
+    
 };
 
 export default ScanBusinessCardMobile;
