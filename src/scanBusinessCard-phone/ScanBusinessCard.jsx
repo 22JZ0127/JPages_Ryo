@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'; 
 import './scanBusinessCard.css'; 
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Ajax from '../lib/Ajax';
 
 const ScanBusinessCardMobile = () => {
     const [image, setImage] = useState(null); 
@@ -9,7 +10,7 @@ const ScanBusinessCardMobile = () => {
         companyName: '',
         email: ''
     });
-    const [visitorType, setVisitorType] = useState(''); // 追加: 選択された訪問者タイプ
+    const [visitorType, setVisitorType] = useState(''); 
     const [isImageCaptured, setIsImageCaptured] = useState(false); 
     const [loading, setLoading] = useState(false); 
 
@@ -126,7 +127,7 @@ const ScanBusinessCardMobile = () => {
         - 名前は漢字を優先してください。
         - メールアドレスは「@」を含む形式で指定してください。
         - 会社名は最も妥当なもので、株式会社という文字列がある場合はそれを含むものを優先して選んでください。
-        - 会社名に当てはまるものがなく、学校名だと思われるものと学科名だと思われるものがある場合は、学校名ではな●●科のような学科名をORGANIZATIONに出力してください。
+        - 会社名に当てはまるものがなく、学校名だと思われるものと学科名だと思われるものがある場合は、学校名ではなく学科名をORGANIZATIONに出力してください。
         - 極力各要素を埋めるようにしてください。
         
         もしエンティティが見つからない場合は、各プロパティの値を空文字列にし、nullにはしないでください。
@@ -174,69 +175,114 @@ const ScanBusinessCardMobile = () => {
         });
     };
 
+    const handleSubmit = (ev) => {
+        ev.preventDefault();
+        
+        // 訪問者区分に基づいてdivisionを決定
+        let division = 0; // デフォルト値
+        switch (visitorType) {
+            case "1":
+                division = 1; // 企業の方
+                break;
+            case "2":
+                division = 2; // 教員
+                break;
+            case "3":
+                division = 3; // 日本電子専門学校生
+                break;
+            case "4":
+                division = 4; // 卒業生
+                break;
+            case "5":
+                division = 5; // その他
+                break;
+            default:
+                break;
+        }
+    
+        const req = {
+            affiliation: text.companyName,
+            employment_target_id: '8011105000934', // 法人番号を仮で設定
+            name: text.name,
+            email: text.email,
+            division: division // リクエストボディにdivisionを追加
+        };
+    
+        Ajax(null, null, 'visitor', 'POST', req)
+        .then((data) => {
+            if (data.status === 'success') {
+                console.log('登録成功');
+            } else {
+                console.log(data.message);
+            }
+        }).catch((error) => {
+            console.error('通信エラー:', error);
+        });
+    }
+    
 
-return (
-    <div className='container'>
-        {!isImageCaptured ? (
-            <div className='camera'>
-                <video ref={videoRef} className='video' />
-                <p>名刺をスキャンしてください</p>
-                <button className='capture-btn' onClick={handleCapture}>●</button>
-            </div>
-        ) : (
-            <form action="POST" className='input-container'>
-                {/* セレクトボックスを最上部に配置 */}
-                <select 
-                    value={visitorType} 
-                    onChange={e => setVisitorType(e.target.value)}
-                    className="select-box"
-                >
-                    <option value="">来場者区分を選択してください</option>
-                    <option value="1">企業の方</option>
-                    <option value="2">教員</option>
-                    <option value="3">日本電子専門学校生</option>
-                    <option value="4">卒業生</option>
-                    <option value="5">その他</option>
-                </select>
+    return (
+        <>
+            <div className='container'>
+                {!isImageCaptured ? (
+                    <div className='camera'>
+                        <video ref={videoRef} className='video' />
+                        <p>名刺をスキャンしてください</p>
+                        <button className='capture-btn' onClick={handleCapture}>●</button>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit} className='input-container'>
+                        {/* セレクトボックスを最上部に配置 */}
+                        <select 
+                            value={visitorType} 
+                            onChange={e => setVisitorType(e.target.value)}
+                            className="select-box"
+                        >
+                            <option value="">来場者区分を選択してください</option>
+                            <option value="1">企業の方</option>
+                            <option value="2">教員</option>
+                            <option value="3">日本電子専門学校生</option>
+                            <option value="4">卒業生</option>
+                            <option value="5">その他</option>
+                        </select>
 
-                <input 
-                    type="text" 
-                    value={text.name} 
-                    onChange={e => setText({ ...text, name: e.target.value })} 
-                    placeholder="氏名" 
-                />
-                {text.name === '' && <div className='warning'>手入力をお願いします</div>}
-                
-                <input 
-                    type="email" 
-                    value={text.email} 
-                    onChange={e => setText({ ...text, email: e.target.value })} 
-                    placeholder="e-mail" 
-                />
-                {text.email === '' && <div className='warning'>手入力をお願いします</div>}
-                
-                <input 
-                    type="text" 
-                    value={text.companyName} 
-                    onChange={e => setText({ ...text, companyName: e.target.value })} 
-                    placeholder="所属" 
-                />
-                {text.companyName === '' && <div className='warning'>手入力をお願いします</div>}
-                
-                {/* 手入力をお願いしますメッセージを所属の下に表示 */}
-                {(visitorType === '2' || visitorType === '3') && (
-                    <div>所属には学科名を入力してください。<br />例：高度情報処理科</div>
+                        <input 
+                            type="text" 
+                            value={text.name} 
+                            onChange={e => setText({ ...text, name: e.target.value })} 
+                            placeholder="氏名" 
+                        />
+                        {text.name === '' && <div className='warning'>手入力をお願いします</div>}
+                        
+                        <input 
+                            type="email" 
+                            value={text.email} 
+                            onChange={e => setText({ ...text, email: e.target.value })} 
+                            placeholder="e-mail" 
+                        />
+                        {text.email === '' && <div className='warning'>手入力をお願いします</div>}
+                        
+                        <input 
+                            type="text" 
+                            value={text.companyName} 
+                            onChange={e => setText({ ...text, companyName: e.target.value })} 
+                            placeholder="所属" 
+                        />
+                        {text.companyName === '' && <div className='warning'>手入力をお願いします</div>}
+                        
+                        {/* 手入力をお願いしますメッセージを所属の下に表示 */}
+                        {(visitorType === '2' || visitorType === '3') && (
+                            <div>所属には学科名を入力してください。<br />例：高度情報処理科</div>
+                        )}
+
+                        <button type="submit" className='confirm-btn'>確認</button>
+                    </form>
                 )}
-
-                <button className='confirm-btn' onClick={() => console.log('次の画面へ遷移')}>確認</button>
-            </form>
-        )}
-        {loading && <div className='loading-message'>現在スキャン中です...</div>}
-        <canvas ref={canvasRef} className='canvas' width="960" height="540" style={{ display: 'none' }}></canvas>
-    </div>
-);
-
-
+                {loading && <div className='loading-message'>現在スキャン中です...</div>}
+                <canvas ref={canvasRef} className='canvas' width="960" height="540" style={{ display: 'none' }}></canvas>
+            </div>
+        </>
+    );
 };
 
 export default ScanBusinessCardMobile;
