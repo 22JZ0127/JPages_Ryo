@@ -1,0 +1,105 @@
+/* 全画面に背景色を適用 */
+body {
+    background-color: #F7F2DF; /* 薄いベージュ */
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* アンケート全体のコンテナ */
+.questionnaire-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px 20px 60px; /* 下部パディングを追加して、ボタンを上げる */
+    text-align: center;
+    background-color: #F7F2DF; /* 薄いベージュ */
+}
+
+
+/* タイトルのスタイリング */
+.title {
+    color: #876344; /* ブラウン */
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* フォーム全体のスタイル */
+.questionnaire-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex-grow: 1; /* フォームが残りのスペースを埋める */
+    overflow-y: auto; /* 必要に応じてスクロール可能に */
+}
+
+/* 質問ごとのスタイル */
+.question-item {
+    background-color: #F2ECD4; /* 濃い目ベージュ */
+    padding: 15px;
+    border-radius: 10px;
+    text-align: left;
+}
+
+/* 各質問のラベル */
+.question-label {
+    color: #876344; /* 濃緑 */
+    font-size: 18px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* 入力フィールドのスタイル */
+.answer-input {
+    width: 90%;
+    padding: 10px;
+    border: 2px solid #876344; /* 薄緑 */
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* モバイル対応 */
+@media (max-width: 600px) {
+    .question-label {
+        font-size: 16px;
+    }
+}
+
+/* 送信ボタンのスタイル */
+.submit-button {
+    background-color: #876344; /* 濃緑 */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 20px auto 0; /* 上部マージン、左右中央寄せ、下部なし */
+    display: block;
+    width: 40%; /* 横幅を画面全体の40%に設定 */
+    align-self: center; /* ボタンを中央に配置 */
+}
+
+.rating-container {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+.rating-button {
+    background-color: #f0f0f0; /* ボタンのデフォルトの背景色 */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    flex: 1;
+    margin: 0 5px;
+    transition: background-color 0.3s;
+}
+
+.rating-button.selected {
+    background-color: #4CAF50; /* 選択されたボタンの背景色 */
+    color: white; /* 選択されたボタンの文字色 */
+}
+
+.rating-button:hover {
+    background-color: #ddd; /* ホバー時の色 */
+}
