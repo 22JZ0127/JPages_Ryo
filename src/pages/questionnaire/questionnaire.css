@@ -105,6 +105,4 @@ body {
     color: white; /* 選択されたボタンの文字色 */
 }
 
-.rating-button:hover {
-    background-color: #ddd; /* ホバー時の色 */
-}
+

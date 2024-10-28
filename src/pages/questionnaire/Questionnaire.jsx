@@ -6,7 +6,7 @@ const Questionnaire = () => {
     const [questions, setQuestions] = useState([]);
     const [answers, setAnswers] = useState([]); // 回答を配列で管理
     const [errorMessage, setErrorMessage] = useState('');
-    const token = "visitorToken"; // ローカルストレージからトークンを取得
+    const token = "visitorToken1"; // ローカルストレージからトークンを取得
 
     useEffect(() => {
         Ajax(null, null, 'questionnaire/1', 'GET')
