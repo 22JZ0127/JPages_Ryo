@@ -52,6 +52,7 @@ const Questionnaire = () => {
             // 最初に/survey/answerにPOSTし、answer_idを取得
             const response = await Ajax(null, token, 'survey/answer', 'POST', null);
             if (response.status === 'success') {
+                console.log("response", response);
                 const answerId = response.id;
 
                 // 各回答をそれぞれのエンドポイントに送信
