@@ -4,88 +4,96 @@ import './questionnaire.css';
 
 const Questionnaire = () => {
     const [questions, setQuestions] = useState([]);
-    const [selectedAnswers, setSelectedAnswers] = useState({});
-    const [errorMessage, setErrorMessage] = useState(''); // エラーメッセージの状態を追加
+    const [answers, setAnswers] = useState([]); // 回答を配列で管理
+    const [errorMessage, setErrorMessage] = useState('');
     const token = "visitorToken"; // ローカルストレージからトークンを取得
 
     useEffect(() => {
-        Ajax(null, null, 'questionnaire/1', 'GET', null)
+        Ajax(null, null, 'questionnaire/1', 'GET')
             .then((data) => {
                 if (data.status === 'success') {
                     console.log('data : ', data);
                     const sortedQuestions = data.questionnaire.sort((a, b) => a.order - b.order);
                     setQuestions(sortedQuestions);
+
+                    // 初期回答の配列を質問データに基づいて作成
+                    const initialAnswers = sortedQuestions.map((question) => ({
+                        questionnaire_id: question.questionnaire_id,
+                        question_id: question.id,
+                        answer: question.isstring === 1 ? '' : null // テキスト/評価のプレースホルダー
+                    }));
+                    setAnswers(initialAnswers);
                 } else {
-                    console.log('アンケート情報を取得できませんでした笑');
+                    console.log('アンケート情報を取得できませんでした');
                 }
             });
     }, []);
 
-    const handleRatingClick = (questionId, rating) => {
-        setSelectedAnswers((prev) => ({ ...prev, [questionId]: rating }));
+    const handleAnswerChange = (questionId, value) => {
+        setAnswers((prevAnswers) =>
+            prevAnswers.map((answer) =>
+                answer.question_id === questionId ? { ...answer, answer: value } : answer
+            )
+        );
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        setErrorMessage(''); // エラーメッセージをリセット
+        setErrorMessage('');
 
-        // エラーチェック
-        const unansweredQuestions = questions.filter((question) => {
-            return question.isstring === 1
-                ? !selectedAnswers[question.id] // テキストの回答が未入力
-                : selectedAnswers[question.id] === undefined; // 数値の回答が未選択
-        });
-
+        // すべての質問に回答しているか確認
+        const unansweredQuestions = answers.filter((answer) => answer.answer === '' || answer.answer === null);
         if (unansweredQuestions.length > 0) {
-            setErrorMessage('すべての質問に回答してください。'); // エラーメッセージを設定
+            setErrorMessage('すべての質問に回答してください。');
             return;
         }
 
-        const answersArray = questions.map((question) => ({
-            questionnaire_id: question.questionnaire_id,
-            answer_id: null, // 後で設定
-            answer: question.isstring === 1 
-                ? selectedAnswers[question.id] // テキストの回答
-                : selectedAnswers[question.id], // 数値の回答
-        }));
+        try {
+            // 最初に/survey/answerにPOSTし、answer_idを取得
+            const response = await Ajax(null, token, 'survey/answer', 'POST', null);
+            if (response.status === 'success') {
+                const answerId = response.id;
 
-        // まず /survey/answer に POST リクエストを送信 (リクエストボディはnull)
-        Ajax(null, token, 'survey/answer', 'POST', null)
-            .then((response) => {
-                if (response.status === 'success') {
-                    console.log("response", response);
-                    const answerId = response.id;
+                // 各回答をそれぞれのエンドポイントに送信
+                for (const answer of answers) {
+                    const endpoint = questions.find(q => q.id === answer.question_id).isstring === 1
+                        ? 'survey/answer/text'
+                        : 'survey/answer/number';
 
-                    // 各回答に対してテキストまたは数字で適切なPOSTリクエストを送信
-                    answersArray.forEach((answer) => {
-                        const url = answer.answer.isstring === 1 ? 'text' : 'number';
+                    const postData = {
+                        question_id: answer.question_id,
+                        answer_id: answerId,
+                        answer: answer.answer,
+                    };
 
-                        Ajax(null, token, `survey/answer/${url}`, 'POST', {
-                            questionnaire_id: answer.questionnaire_id,
-                            answer_id: answerId,
-                            answer: answer.answer,
-                        });
-                    });
-                } else {
-                    console.log('回答送信に失敗しました');
+                    const res = await Ajax(null, token, endpoint, 'POST', postData);
+                    if (res.status !== 'success') {
+                        console.error(`質問ID ${answer.question_id} の回答送信に失敗しました:`, res);
+                    }
                 }
-            });
+                console.log("すべての回答が送信されました");
+            } else {
+                console.log('回答送信に失敗しました');
+            }
+        } catch (error) {
+            console.error('初期回答の送信エラー:', error);
+        }
     };
 
     return (
         <div className="questionnaire-container">
             <h1 className="title">アンケート</h1>
-            {errorMessage && <div className="error-message">{errorMessage}</div>} {/* エラーメッセージの表示 */}
+            {errorMessage && <div className="error-message">{errorMessage}</div>}
             <form className="questionnaire-form" onSubmit={handleSubmit}>
                 {questions.map((question, index) => (
                     <div key={index} className="question-item">
                         <label className="question-label">{question.question}</label>
                         {question.isstring === 1 ? (
-                            <textarea 
-                                rows="3" 
-                                className="answer-input" 
+                            <textarea
+                                rows="3"
+                                className="answer-input"
                                 name={`answer-${question.id}`}
-                                onChange={(e) => handleRatingClick(question.id, e.target.value)} // 入力を更新
+                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
                             />
                         ) : (
                             <div className="rating-container">
@@ -93,8 +101,8 @@ const Questionnaire = () => {
                                     <button
                                         type="button"
                                         key={num}
-                                        className={`rating-button ${selectedAnswers[question.id] === num ? 'selected' : ''}`}
-                                        onClick={() => handleRatingClick(question.id, num)}
+                                        className={`rating-button ${answers.find(answer => answer.question_id === question.id)?.answer === num ? 'selected' : ''}`}
+                                        onClick={() => handleAnswerChange(question.id, num)}
                                     >
                                         {num}
                                     </button>
@@ -107,6 +115,6 @@ const Questionnaire = () => {
             </form>
         </div>
     );
-}
+};
 
 export default Questionnaire;

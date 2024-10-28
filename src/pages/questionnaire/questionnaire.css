@@ -86,8 +86,10 @@ body {
 
 .rating-button {
     background-color: #f0f0f0; /* ボタンのデフォルトの背景色 */
+    width: 60px;
+    height: 60px;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 99px;
     padding: 10px;
     cursor: pointer;
     flex: 1;
@@ -96,7 +98,7 @@ body {
 }
 
 .rating-button.selected {
-    background-color: #4CAF50; /* 選択されたボタンの背景色 */
+    background-color: #876344; /* 選択されたボタンの背景色 */
     color: white; /* 選択されたボタンの文字色 */
 }
 
