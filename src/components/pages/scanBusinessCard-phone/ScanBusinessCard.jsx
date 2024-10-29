@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'; 
 import './scanBusinessCard.css'; 
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import Ajax from '../../lib/Ajax';
+import Ajax from '../../../lib/Ajax';
+import Camera from '../../common/scanbusinesscard/Camera';
 
 const ScanBusinessCardMobile = () => {
     const [image, setImage] = useState(null); 
@@ -240,11 +241,10 @@ const ScanBusinessCardMobile = () => {
         <>
             <div className='container'>
                 {!isImageCaptured ? (
-                    <div className='camera'>
-                        <video ref={videoRef} className='video' />
-                        <p>名刺をスキャンしてください</p>
-                        <button className='capture-btn' onClick={handleCapture}>●</button>
-                    </div>
+                    <Camera
+                        videoRef={videoRef}
+                        handleCapture={handleCapture}
+                    />
                 ) : (
                     <form onSubmit={handleSubmit} className='input-container'>
                         <select 

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 // import NumberInput from '../../components/questionnaire/NumberInput';
-import Ajax from '../../lib/Ajax';
+import Ajax from '../../../lib/Ajax';
 import './questionnaire.css';
+import NumberInput from '../../base/questionnaireinput/NumberInput';
+import TextInput from '../../base/questionnaireinput/TextInput'
 
 const Questionnaire = () => {
     const [questions, setQuestions] = useState([]);
@@ -91,30 +93,17 @@ const Questionnaire = () => {
                     <div key={index} className="question-item">
                         <label className="question-label">{question.question}</label>
                         {question.isstring === 1 ? (
-                            <textarea
-                                rows="3"
-                                className="answer-input"
-                                name={`answer-${question.id}`}
-                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            <TextInput
+                                question={question}
+                                handleAnswerChange={handleAnswerChange}
                             />
                         ) : (
-                            // <NumberInput
-                            //     answers={answers}
-                            //     question={question}
-                            //     handleAnswerChange={handleAnswerChange}
-                            // />
-                            <div className="rating-container">
-                {[1, 2, 3, 4, 5].map((num) => (
-                    <button
-                        type="button"
-                        key={num}
-                        className={`rating-button ${answers.find(answer => answer.question_id === question.id)?.answer === num ? 'selected' : ''}`}
-                        onClick={() => handleAnswerChange(question.id, num)}
-                    >
-                        {num}
-                    </button>
-                ))}
-            </div>
+                            <NumberInput
+                                answers={answers}
+                                question={question}
+                                handleAnswerChange={handleAnswerChange}
+                            />
+                            
                         )}
                     </div>
                 ))}

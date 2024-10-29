@@ -1,7 +1,6 @@
-// function NumberInput(props) {
-//     const {person = props.person}
-//     return (
-//         <>
+function NumberInput({answers, question, handleAnswerChange}) {
+    return (
+        <>
             <div className="rating-container">
                 {[1, 2, 3, 4, 5].map((num) => (
                     <button
@@ -14,8 +13,8 @@
                     </button>
                 ))}
             </div>
-//         </>
-//     )
-// }
+            </>
+    )
+}
 
-// export default NumberInput;
+export default NumberInput;
