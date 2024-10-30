@@ -8,7 +8,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
-        <ScanBusinessCard/>
+        <Questionnaire/>
       </BrowserRouter>
       
     </>

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 // import NumberInput from '../../components/questionnaire/NumberInput';
 import Ajax from '../../../lib/Ajax';
 import './questionnaire.css';
-import NumberInput from '../../base/questionnaireinput/NumberInput';
-import TextInput from '../../base/questionnaireinput/TextInput'
+import NumberInput from '../../base/numberinput/NumberInput';
+import TextInput from '../../base/textinput/TextInput'
+import QuestionnaireForm from '../../common/questionnaireform/QuestionnaireForm';
 
 const Questionnaire = () => {
     const [questions, setQuestions] = useState([]);
@@ -85,31 +86,20 @@ const Questionnaire = () => {
     };
 
     return (
-        <div className="questionnaire-container">
-            <h1 className="title">アンケート</h1>
-            {errorMessage && <div className="error-message">{errorMessage}</div>}
-            <form className="questionnaire-form" onSubmit={handleSubmit}>
-                {questions.map((question, index) => (
-                    <div key={index} className="question-item">
-                        <label className="question-label">{question.question}</label>
-                        {question.isstring === 1 ? (
-                            <TextInput
-                                question={question}
-                                handleAnswerChange={handleAnswerChange}
-                            />
-                        ) : (
-                            <NumberInput
-                                answers={answers}
-                                question={question}
-                                handleAnswerChange={handleAnswerChange}
-                            />
-                            
-                        )}
-                    </div>
-                ))}
-                <button type="submit" className="submit-button">送信</button>
-            </form>
-        </div>
+        <>
+            <div className="questionnaire-container">
+                <h1 className="title">アンケート</h1>
+                {errorMessage && <div className="error-message">{errorMessage}</div>}
+            </div>
+            <QuestionnaireForm
+                handleSubmit={handleSubmit}
+                questions={questions}
+                TextInput={TextInput}
+                handleAnswerChange={handleAnswerChange}
+                NumberInput={NumberInput}
+                answers={answers}
+            />
+        </>
     );
 };
 

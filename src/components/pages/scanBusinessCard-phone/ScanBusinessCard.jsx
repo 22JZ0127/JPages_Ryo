@@ -3,6 +3,8 @@ import './scanBusinessCard.css';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Ajax from '../../../lib/Ajax';
 import Camera from '../../common/scanbusinesscard/Camera';
+import ScanBusinessCardForm from '../../common/scanbusinesscardform/ScanBusinessCardForm';
+import LoadingMessage from '../../base/loadingmessage/LoadingMessage';
 
 const ScanBusinessCardMobile = () => {
     const [image, setImage] = useState(null); 
@@ -246,62 +248,21 @@ const ScanBusinessCardMobile = () => {
                         handleCapture={handleCapture}
                     />
                 ) : (
-                    <form onSubmit={handleSubmit} className='input-container'>
-                        <select 
-                            value={visitorType} 
-                            onChange={e => {
-                                setVisitorType(e.target.value);
-                                // エラーメッセージをリセット
-                                if (e.target.value !== '0') {
-                                    setErrorMessage('');
-                                }
-                            }}
-                            className="select-box"
-                        >
-                            <option value="0">来場者区分を選択してください</option>
-                            <option value="1">企業の方</option>
-                            <option value="2">教員</option>
-                            <option value="3">日本電子専門学校生</option>
-                            <option value="4">卒業生</option>
-                            <option value="5">その他</option>
-                        </select>
-    
-                        {/* エラーメッセージの表示 */}
-                        {errorMessage && <div className='error-message' style={{ color: 'red' }}>{errorMessage}</div>}
-    
-                        <input 
-                            type="text" 
-                            value={text.name} 
-                            onChange={e => setText({ ...text, name: e.target.value })} 
-                            placeholder="氏名" 
-                        />
-                        {!loading && text.name === '' && <div className='warning'>手入力をお願いします</div>}
-                        
-                        <input 
-                            type="email" 
-                            value={text.email} 
-                            onChange={e => setText({ ...text, email: e.target.value })} 
-                            placeholder="e-mail" 
-                        />
-                        {!loading && text.email === '' && <div className='warning'>手入力をお願いします</div>}
-                        
-                        <input 
-                            type="text" 
-                            value={text.companyName} 
-                            onChange={e => setText({ ...text, companyName: e.target.value })} 
-                            placeholder="所属" 
-                        />
-                        {!loading && text.companyName === '' && <div className='warning'>手入力をお願いします</div>}
-                        
-                        {(visitorType === '2' || visitorType === '3') && (
-                            <div>所属には学科名を入力してください。<br />例：高度情報処理科</div>
-                        )}
-    
-                        <button type="submit" className='confirm-btn'>確認</button>
-                    </form>
+                    <ScanBusinessCardForm
+                        handleSubmit={handleSubmit}
+                        visitorType={visitorType}
+                        setVisitorType={setVisitorType}
+                        setErrorMessage={setErrorMessage}
+                        errorMessage={errorMessage}
+                        text={text}
+                        loading={loading}
+                        setText={setText}
+                    />
                 )}
-                {loading && <div className='loading-message'>現在スキャン中です...</div>}
-                <canvas ref={canvasRef} className='canvas' width="960" height="540" style={{ display: 'none' }}></canvas>
+                <LoadingMessage
+                    loading={loading}
+                    canvasRef={canvasRef}
+                />
             </div>
         </>
     );
