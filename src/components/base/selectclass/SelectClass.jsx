@@ -1,3 +1,5 @@
+import styles from "./selectClass.module.css"
+
 function ScanBUsinessCardFormSelect({visitorType, setVisitorType, setErrorMessage }) {
     return (
         <>
@@ -10,7 +12,7 @@ function ScanBUsinessCardFormSelect({visitorType, setVisitorType, setErrorMessag
                         setErrorMessage('');
                     }
                 }}
-                className="select-box"
+                className={styles["select-box"]}
             >
                 <option value="0">来場者区分を選択してください</option>
                 <option value="1">企業の方</option>

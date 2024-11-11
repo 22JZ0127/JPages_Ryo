@@ -1,9 +1,11 @@
+import styles from "./textInput.module.css"
+
 function TextInput({question, handleAnswerChange}) {
     return (
         <>
             <textarea
                 rows="3"
-                className="answer-input"
+                className={styles["answer-input"]}
                 name={`answer-${question.id}`}
                 onChange={(e) => handleAnswerChange(question.id, e.target.value)}
             />

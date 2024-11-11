@@ -1,0 +1,8 @@
+/* 入力フィールドのスタイル */
+.answer-input {
+    width: 90%;
+    padding: 10px;
+    border: 2px solid #876344; /* 薄緑 */
+    border-radius: 5px;
+    font-size: 16px;
+}

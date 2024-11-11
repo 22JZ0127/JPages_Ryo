@@ -1,0 +1,13 @@
+/* 読み込み中のメッセージ */
+.loading-message {
+    font-size: 24px;
+    font-weight: bold;
+    color: #F2B885; /* オレンジ */
+    margin: 10px 0;
+    text-align: center;
+}
+
+/* カメラプレビュー用のキャンバスを非表示にする */
+.canvas {
+    display: none;
+}

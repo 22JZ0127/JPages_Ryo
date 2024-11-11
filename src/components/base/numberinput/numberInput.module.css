@@ -1,0 +1,26 @@
+.rating-container {
+    display: flex;
+    justify-content: center; /* 中央揃え */
+}
+
+.rating-button {
+    background-color: #ffffff; /* ボタンのデフォルトの背景色 */
+    width: 50px; /* 固定幅 */
+    height: 50px; /* 固定高さ */
+    border: none;
+    border-radius: 50%; /* 完全に円形にする */
+    padding: 0; /* 内側の余白をなくす */
+    cursor: pointer;
+    margin: 0 5px; /* 左右のマージン */
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center; /* 垂直中央揃え */
+    justify-content: center; /* 水平中央揃え */
+    font-size: 18px; /* ボタン内のテキストサイズ */
+}
+
+/* 追加のスタイル */
+.rating-button.selected {
+    background-color: #876344; /* 選択されたボタンの背景色 */
+    color: white; /* 選択されたボタンの文字色 */
+}

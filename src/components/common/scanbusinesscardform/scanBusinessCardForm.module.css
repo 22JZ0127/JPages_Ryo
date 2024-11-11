@@ -1,0 +1,48 @@
+/* フォームのコンテナ */
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 90%;
+    max-width: 400px;
+    padding: 20px;
+    background-color: #E8FAF4; /* 薄めの青 */
+    border-radius: 10px;
+}
+
+.input-box {
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 5px;
+    border: 1px solid #D9D9D9; /* グレー */
+    text-align: center;
+    background-color: #DEF294; /* 黄緑 */
+}
+
+.error-message {
+    color: red; /* 赤字 */
+    margin-top: 10px; /* 上の余白 */
+}
+
+/* 警告メッセージのスタイル */
+.warning {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+/* 確認ボタン */
+.confirm-btn {
+    padding: 15px;
+    font-size: 18px;
+    background-color: #75B49C; /* 濃い緑 */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.confirm-btn:hover {
+    background-color: #5A947D; /* 濃い緑の少し暗い色 */
+}
+

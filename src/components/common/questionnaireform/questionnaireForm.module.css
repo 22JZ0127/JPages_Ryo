@@ -1,0 +1,24 @@
+/* フォーム全体のスタイル */
+.questionnaire-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex-grow: 1; /* フォームが残りのスペースを埋める */
+    overflow-y: auto; /* 必要に応じてスクロール可能に */
+}
+
+/* 質問ごとのスタイル */
+.question-item {
+    background-color: #F2ECD4; /* 濃い目ベージュ */
+    padding: 15px;
+    border-radius: 10px;
+    text-align: left;
+}
+
+/* 各質問のラベル */
+.question-label {
+    color: #876344; /* 濃緑 */
+    font-size: 18px;
+    margin-bottom: 10px;
+    display: block;
+}

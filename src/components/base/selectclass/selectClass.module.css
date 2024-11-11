@@ -1,0 +1,8 @@
+.select-box {
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 5px;
+    border: 1px solid #D9D9D9; /* グレー */
+    text-align: center;
+    background-color: #DEF294; /* 黄緑 */
+}

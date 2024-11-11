@@ -1,12 +1,13 @@
 import SubmitButton from "../../base/submitbutton/SubmitButton";
+import styles from "./questionnaireForm.module.css"
 
 function QuestionnaireForm({handleSubmit, questions, TextInput, handleAnswerChange, NumberInput, answers}) {
     return (
         <>
-            <form className="questionnaire-form" onSubmit={handleSubmit}>
+            <form className={styles["questionnaire-form"]} onSubmit={handleSubmit}>
                 {questions.map((question, index) => (
-                    <div key={index} className="question-item">
-                        <label className="question-label">{question.question}</label>
+                    <div key={index} className={styles["question-item"]}>
+                        <label className={styles["question-label"]}>{question.question}</label>
                         {question.isstring === 1 ? (
                             <TextInput
                                 question={question}
@@ -18,7 +19,6 @@ function QuestionnaireForm({handleSubmit, questions, TextInput, handleAnswerChan
                                 question={question}
                                 handleAnswerChange={handleAnswerChange}
                             />
-                            
                         )}
                     </div>
                 ))}

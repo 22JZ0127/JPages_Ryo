@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import './scanBusinessCard.css'; 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Ajax from '../../../lib/Ajax';
-import Camera from '../../common/scanbusinesscard/Camera';
+import Camera from '../../common/camera/Camera';
 import ScanBusinessCardForm from '../../common/scanbusinesscardform/ScanBusinessCardForm';
 import LoadingMessage from '../../base/loadingmessage/LoadingMessage';
 
