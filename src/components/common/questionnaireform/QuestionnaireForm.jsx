@@ -22,7 +22,9 @@ function QuestionnaireForm({handleSubmit, questions, TextInput, handleAnswerChan
                         )}
                     </div>
                 ))}
-                <SubmitButton/>
+                <SubmitButton
+                    visualType={"submit"}
+                />
             </form>
         </>
     )

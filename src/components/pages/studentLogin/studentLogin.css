@@ -1,0 +1,35 @@
+/* 全体の背景色とフォント設定（モバイル向け） */
+body {
+    background-color: #f7f2df;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* ログインフォームのコンテナ */
+.login-form-container {
+    width: 90%;
+    max-width: 360px;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* タイトル */
+.title {
+    font-size: 1.5em;
+    color: #876344;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* エラーメッセージ */
+.error-message {
+    color: red;
+    font-size: 0.85em;
+    margin-top: 10px;
+    text-align: center;
+}
