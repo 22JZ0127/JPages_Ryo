@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Ajax from '../../../lib/Ajax';
-import './studentLogin.css'
+import './studentLogin.css';
 import LoginInput from '../../base/logininput/LoginInput';
 import SubmitButton from '../../base/submitbutton/SubmitButton';
 
@@ -11,8 +11,15 @@ const StudentLogin = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   // フォームの変更を管理
-  const handleNumberChange = (e) => setNumber(e.target.value);
-  const handleNameChange = (e) => setName(e.target.value);
+  const handleNumberChange = (e) => {
+    setNumber(e.target.value);
+    if (errorMessage) setErrorMessage(''); // 入力があったらエラーを消す
+  };
+
+  const handleNameChange = (e) => {
+    setName(e.target.value);
+    if (errorMessage) setErrorMessage(''); // 入力があったらエラーを消す
+  };
 
   // フォーム送信時の処理
   const handleSubmit = async (e) => {
@@ -38,8 +45,8 @@ const StudentLogin = () => {
       if (response.status === 'success') {
         console.log("ログイン成功。画面遷移。")
         // ログイン後のリダイレクトや別の処理をここに追加
-      } else {
-        setErrorMessage('ログインに失敗しました;;');
+      } else if (response.status === 'failure'){
+        setErrorMessage(response.message);
       }
     } catch (error) {
       setErrorMessage('通信エラーが発生しました');
@@ -66,7 +73,7 @@ const StudentLogin = () => {
             <SubmitButton visualType="login" />
         </form>
     </div>
-);
+  );
 };
 
 export default StudentLogin;
